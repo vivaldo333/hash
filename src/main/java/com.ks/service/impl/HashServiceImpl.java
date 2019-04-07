@@ -64,11 +64,12 @@ public class HashServiceImpl implements HashService {
 
     @Override
     public void addHash(String hash) {
-
+        //TODO
     }
 
     @Override
     public String getMobile(String hash) {
+        //TODO
         return null;
     }
 

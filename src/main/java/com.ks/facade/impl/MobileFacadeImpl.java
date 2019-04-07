@@ -31,11 +31,13 @@ public class MobileFacadeImpl implements MobileFacade {
 
     @Override
     public String getMobile(String hash) {
+        //TODO
         return null;
     }
 
     @Override
     public String getHash(String mobile) {
+        //TODO
         mobileDao.findMobile(mobile);
 
         return null;

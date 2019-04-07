@@ -57,13 +57,13 @@ public class HashServer extends HttpApp {
     @Override
     protected Route routes() {
         MobileFacade mobileFacade = new MobileFacadeImpl();
-        Route route1 = path(segment("mobile").slash(segment(compile("\\d+"))),
+        Route getHashRoute = path(segment("mobile").slash(segment(compile("\\d+"))),
                 (mobile) ->
                         complete(mobileFacade.getMobile(mobile)));
-        Route route2 = path(segment("getHash").slash(segment()),
+        Route getMobileRoute = path(segment("hash").slash(segment()),
                 (hash) -> complete(mobileFacade.getMobile(hash)));
         //complete(StatusCodes.OK)
 
-        return route(route1).orElse(route2);
+        return route(getHashRoute, getMobileRoute);
     }
 }

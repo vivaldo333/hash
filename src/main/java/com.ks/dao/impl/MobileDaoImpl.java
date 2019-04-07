@@ -10,16 +10,11 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.ks.config.Configs;
 import com.ks.constants.AppConstants;
 import com.ks.dao.MobileDao;
-import com.sun.xml.internal.ws.util.StringUtils;
 import io.reactivex.Completable;
 
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 public class MobileDaoImpl implements MobileDao {
@@ -60,13 +55,11 @@ public class MobileDaoImpl implements MobileDao {
                 .value(MOBILE_ATTRIBUTE, mobile)
                 .ifNotExists();
 
-        session.execute(insert.toString()); //ResultSet result =
+        session.execute(insert.toString());
     }
 
     @Override
     public void initDataLoad() {
-
-        //String initMobile = getMobileMask();
         int totalRowsCount = getTotalRowsCount();
         int batchRowsCount = getBatchRowsCount();
         int countOfLoadPool = getLoadIterationsCount(totalRowsCount, batchRowsCount);
@@ -74,17 +67,11 @@ public class MobileDaoImpl implements MobileDao {
         BatchStatement batchStatement = new BatchStatement();
         ExecutorService executor = Executors.newFixedThreadPool(countAvailableProcessors);
 
-        IntStream.range(1, countOfLoadPool).forEach(loadPoolNumber ->
-                        //getTask(countOfLoadPool, session, batchStatement).run()
-                //executor.execute(getTask(countOfLoadPool, session, batchStatement))
-        {
-            Completable completable = Completable.fromFuture(executor.submit(getTask(countOfLoadPool, session, batchStatement)));
+        IntStream.range(1, countOfLoadPool).forEach(loadPoolNumber -> {
+            Completable completable = Completable.fromFuture(
+                    executor.submit(getTask(countOfLoadPool, session, batchStatement)));
             completable.blockingAwait();
-        }
-
-        );
-
-
+        });
 
         executor.shutdown();
     }
@@ -94,11 +81,11 @@ public class MobileDaoImpl implements MobileDao {
     }
 
     private int getBatchRowsCount() {
-        return 10; //Configs.getConfig().getInt(AppConstants.DATA.ROWS_BATCH_AMOUNT);
+        return Configs.getConfig().getInt(AppConstants.DATA.ROWS_BATCH_AMOUNT);
     }
 
     private int getTotalRowsCount() {
-        return 100; //Configs.getConfig().getInt(AppConstants.DATA.ROWS_TOTAL_AMOUNT);
+        return Configs.getConfig().getInt(AppConstants.DATA.ROWS_TOTAL_AMOUNT);
     }
 
     private String getMobileMask() {
@@ -108,9 +95,10 @@ public class MobileDaoImpl implements MobileDao {
     private Runnable getTask(int countOfLoadPool, Session session, BatchStatement batchStatement) {
         return () -> {
             PreparedStatement preparedStatement = session.prepare(INSERT_QUERY);
+            int initRowNumber = 1;
             int batchRowsCount = getRecalculatedBatchRowCount(countOfLoadPool);
 
-            for (int rowNumber = 1; rowNumber <= batchRowsCount; rowNumber++) {
+            for (int rowNumber = initRowNumber; rowNumber <= batchRowsCount; rowNumber++) {
                 //sequence generator
                 String generatedMobile = generateMobileNumber(countOfLoadPool, batchRowsCount, rowNumber);
                 batchStatement.add(preparedStatement.bind(generatedMobile));
@@ -127,7 +115,7 @@ public class MobileDaoImpl implements MobileDao {
 
     private int getRecalculatedBatchRowCount(int countOfLoadPool) {
         int batchRowsCount = getBatchRowsCount();
-        int countToLoad =(batchRowsCount * countOfLoadPool) - getTotalRowsCount();
+        int countToLoad = (batchRowsCount * countOfLoadPool) - getTotalRowsCount();
 
         if (countToLoad > 0) {
             return batchRowsCount - countToLoad;
