@@ -19,7 +19,7 @@ dependencies {
     compile('com.datastax.cassandra:cassandra-driver-core:3.6.0')
     compile('com.datastax.cassandra:cassandra-driver-mapping:3.6.0')
     compile('io.reactivex.rxjava2:rxjava:2.2.8')
-    compile ('commons-codec:commons-codec:1.9')
+    compile('commons-codec:commons-codec:1.9')
     compile('org.bouncycastle:bcpkix-jdk15on:1.61')
     compile('org.apache.commons:commons-lang3:3.0')
     testCompile('com.typesafe.akka:akka-http-testkit_2.12:10.1.5')

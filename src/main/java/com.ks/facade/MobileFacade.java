@@ -1,7 +1,9 @@
 package com.ks.facade;
 
-public interface MobileFacade {
-    String getMobile(String hash);
+import akka.http.javadsl.server.Route;
 
-    String getHash(String mobile);
+public interface MobileFacade {
+    Route getMobileRoute();
+
+    Route getHashRoute();
 }

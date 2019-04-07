@@ -14,12 +14,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +36,7 @@ public class MobileDaoImplTest {
     @Test
     public void initDataLoad() {
         when(session.prepare(anyString())).thenReturn(preparedStatement);
-        testInstance.initDataLoad();
+        testInstance.initLoad();
     }
 
     @Test
@@ -55,7 +51,7 @@ public class MobileDaoImplTest {
 
         for (int i = 1; i <= countOfLoadPool; i++) {
 
-            int countToLoad =(batchRowsCount * countOfLoadPool) - totalRowsCount;
+            int countToLoad = (batchRowsCount * countOfLoadPool) - totalRowsCount;
             if (countToLoad > 0) {
                 batchRowsCount = batchRowsCount - countToLoad;
             }

@@ -1,12 +1,15 @@
 package com.ks.dao;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MobileDao {
-    Optional<String> findMobile(String mobile);
+    Optional<Long> findMobile(Long mobile);
 
-    void addMobile(String mobile);
+    List<Long> findAllMobiles();
 
-    void initDataLoad();
+    void addMobile(Long mobile);
+
+    void initLoad() throws InterruptedException;
 
 }

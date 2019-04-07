@@ -1,45 +1,83 @@
 package com.ks.facade.impl;
 
-import com.datastax.driver.core.Session;
-import com.ks.config.CassandraConnector;
-import com.ks.config.DbClient;
-import com.ks.dao.MobileDao;
-import com.ks.dao.impl.MobileDaoImpl;
+import akka.http.javadsl.model.StatusCodes;
+import akka.http.javadsl.server.Route;
+import akka.http.javadsl.server.directives.SecurityDirectives;
+import com.ks.exceptions.InconsistentHashCodeException;
 import com.ks.facade.MobileFacade;
+import com.ks.service.HashService;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
+
+import static akka.http.javadsl.server.Directives.authenticateBasicAsync;
+import static akka.http.javadsl.server.Directives.complete;
+import static akka.http.javadsl.server.Directives.path;
+import static akka.http.javadsl.server.PathMatchers.segment;
+import static java.util.regex.Pattern.compile;
 
 public class MobileFacadeImpl implements MobileFacade {
 
-    private DbClient client;
-    private MobileDao mobileDao;
+    private HashService hashService;
+    private final Function<Optional<SecurityDirectives.ProvidedCredentials>, CompletionStage<Optional<String>>>
+            basicAuthenticator = opt -> {
+        if (opt.filter(credentials -> credentials.identifier().equals("user")
+                && credentials.verify("password")).isPresent()) {
+            return CompletableFuture.completedFuture(Optional.of(opt.get().identifier()));
+        } else {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+    };
 
-    public MobileFacadeImpl() {
-        this.client = new CassandraConnector();
-        client.connect("127.0.0.1", 9042);
 
-        this.mobileDao = new MobileDaoImpl(client.getSession());
-    }
-
-    /*DbClient client = new CassandraConnector();
-    client.connect("127.0.0.1", 9042);
-
-    Session session = client.getSession();
-
-    MobileDao mobileDao = new MobileDaoImpl(session);
-    mobileDao.findMobile("380681112233").ifPresent(System.out::println);
-
-    client.close();*/
-
-    @Override
-    public String getMobile(String hash) {
-        //TODO
-        return null;
+    public MobileFacadeImpl(HashService hashService) {
+        this.hashService = hashService;
     }
 
     @Override
-    public String getHash(String mobile) {
-        //TODO
-        mobileDao.findMobile(mobile);
+    public Route getMobileRoute() {
 
-        return null;
+        return path(segment("hash").slash(segment(compile("\\d+"))),
+                (hash) -> authenticateBasicAsync("secure",
+                        basicAuthenticator,
+                        userName -> complete(StatusCodes.OK, hashService.getMobile(hash).toString())));
+    }
+
+    @Override
+    public Route getHashRoute() {
+        return path(segment("mobile").slash(segment(compile(".*"))),
+                (mobile) -> authenticateBasicAsync("secure",
+                        basicAuthenticator,
+                        userName -> complete(StatusCodes.OK, calculateHash(mobile))));
+    }
+
+    private String calculateHash(String mobile) {
+        Long mobileNumber = Long.valueOf(mobile);
+        String hash = hashService.getHash(mobileNumber);
+
+        if (hashService.isHashExists(hash)) {
+            if (isHashCodeCollision(mobileNumber, hash)) {
+                return hash;
+            } else {
+                throw new InconsistentHashCodeException("Duplication during hashing is defined");
+            }
+        }
+
+        processAddNewMobile(mobileNumber, hash);
+
+        return hash;
+    }
+
+    private void processAddNewMobile(Long mobileNumber, String hash) {
+        hashService.addMobile(mobileNumber);
+        if (hashService.isMobileExists(mobileNumber)) {
+            hashService.addHash(hash, mobileNumber);
+        }
+    }
+
+    private boolean isHashCodeCollision(Long mobileNumber, String hash) {
+        return hashService.getMobile(hash).equals(mobileNumber);
     }
 }

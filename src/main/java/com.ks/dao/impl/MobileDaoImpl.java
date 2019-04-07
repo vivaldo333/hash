@@ -10,13 +10,12 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.ks.config.Configs;
 import com.ks.constants.AppConstants;
 import com.ks.dao.MobileDao;
-import io.reactivex.Completable;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
+@Deprecated
 public class MobileDaoImpl implements MobileDao {
 
     public static final String DOT = ".";
@@ -36,21 +35,27 @@ public class MobileDaoImpl implements MobileDao {
     }
 
     @Override
-    public Optional<String> findMobile(String mobile) {
+    public Optional<Long> findMobile(Long mobile) {
         //QueryBuilder.select().from(KEY_SPACE, TABLE);
         PreparedStatement statements = session.prepare(QUERY_GET_MOBILE);
         ResultSet result = session.execute(statements.bind(mobile));
         Optional<Row> row = result.all().stream().findFirst();
 
         if (row.isPresent()) {
-            return Optional.ofNullable(row.get().get(0, String.class));
+            return Optional.ofNullable(row.get().get(0, Long.class));
         }
 
         return Optional.empty();
     }
 
     @Override
-    public void addMobile(String mobile) {
+    public List<Long> findAllMobiles() {
+        //TODO get all mobiles from DB by batch iterations for putting to Map
+        return null;
+    }
+
+    @Override
+    public void addMobile(Long mobile) {
         Insert insert = QueryBuilder.insertInto(KEY_SPACE, TABLE)
                 .value(MOBILE_ATTRIBUTE, mobile)
                 .ifNotExists();
@@ -59,21 +64,24 @@ public class MobileDaoImpl implements MobileDao {
     }
 
     @Override
-    public void initDataLoad() {
+    public void initLoad() {
         int totalRowsCount = getTotalRowsCount();
         int batchRowsCount = getBatchRowsCount();
         int countOfLoadPool = getLoadIterationsCount(totalRowsCount, batchRowsCount);
         int countAvailableProcessors = Runtime.getRuntime().availableProcessors();
         BatchStatement batchStatement = new BatchStatement();
-        ExecutorService executor = Executors.newFixedThreadPool(countAvailableProcessors);
+        //ExecutorService executor = Executors.newFixedThreadPool(countAvailableProcessors);
 
-        IntStream.range(1, countOfLoadPool).forEach(loadPoolNumber -> {
+        IntStream.range(1, countOfLoadPool).forEach(loadPoolNumber ->
+                        getTask(countOfLoadPool, session, batchStatement).run()
+        /*{
             Completable completable = Completable.fromFuture(
                     executor.submit(getTask(countOfLoadPool, session, batchStatement)));
             completable.blockingAwait();
-        });
+        }*/
+        );
 
-        executor.shutdown();
+        //executor.shutdown();
     }
 
     private int getLoadIterationsCount(int totalRowsCount, int batchRowsCount) {

@@ -18,10 +18,9 @@ public class CassandraConnector implements DbClient {
                 .withPort(port)
                 //.withCredentials(dbUser, dbPassword)
                 .withPoolingOptions(new PoolingOptions()
-                        .setMaxConnectionsPerHost(HostDistance.REMOTE, 100)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2048)
-                        .setMaxConnectionsPerHost(HostDistance.LOCAL, 200)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 4096)
+                                .setMaxConnectionsPerHost(HostDistance.LOCAL, 200)
+                                .setMaxRequestsPerConnection(HostDistance.LOCAL, 30000)
+                                .setPoolTimeoutMillis(10000)
                         //.setPoolTimeoutMillis(5000)
                 )
                 .build();

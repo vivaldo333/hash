@@ -10,10 +10,6 @@ networks:
 
 # Define the services/containers to be run
 services:
-
-#    command: mongod --smallfiles --logpath=/dev/null # --quiet
-
-
   cassandra:
     image: cassandra:3.11 #latest
     container_name: "cassandra"
@@ -36,6 +32,7 @@ services:
     networks:
       - cass_net
 
+# an error has appeared here: ERROR: for cassandra-load-keyspace  Cannot start service cassandra-load-keyspace: oci runtime error: container_linux.go:247: starting container process caused "process_linux.go:359: container init caused
   cassandra-load-keyspace:
       container_name: cassandra-load-keyspace
       image: cassandra:3.11

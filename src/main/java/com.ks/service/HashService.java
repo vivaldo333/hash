@@ -2,11 +2,17 @@ package com.ks.service;
 
 public interface HashService {
 
-    String getHash(String mobile);
+    String getHash(Long mobile);
 
     Boolean isHashExists(String hash);
 
-    void addHash(String hash);
+    void addHash(String hash, Long mobile);
 
-    String getMobile(String hashCode);
+    Long getMobile(String hash);
+
+    void addMobile(Long mobile);
+
+    Boolean isMobileExists(Long mobile);
+
+    void initProjectData() throws InterruptedException;
 }

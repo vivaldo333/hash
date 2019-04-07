@@ -11,7 +11,7 @@ WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
 -- name of 'hashing.table_name', this just makes it easier.
 USE hashing;
 
-CREATE TABLE cellphone (
+CREATE TABLE IF NOT EXISTS cellphone (
   mobile VARCHAR,
   PRIMARY KEY (mobile)
 );
