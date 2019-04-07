@@ -1,0 +1,46 @@
+version: "2" # specify docker-compose version
+
+# set up a network local to the host to which we'll attach
+# the containers. this means that the containers will be
+# on the same network and will be able to communicate and
+# lookup each other in DNS.
+networks:
+  cass_net:
+    driver: bridge
+
+# Define the services/containers to be run
+services:
+
+#    command: mongod --smallfiles --logpath=/dev/null # --quiet
+
+
+  cassandra:
+    image: cassandra:3.11 #latest
+    container_name: "cassandra"
+    ports:
+      - "9042:9042"
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "1"
+    restart: always
+
+    environment:
+#      - CASSANDRA_CLUSTER_NAME=test-cluster
+        - "MAX_HEAP_SIZE=256M"
+        - "HEAP_NEWSIZE=128M"
+#    volumes:
+#      - ${PWD}/cassandra-data:/var/lib/cassandra
+    networks:
+      - cass_net
+
+  cassandra-load-keyspace:
+      container_name: cassandra-load-keyspace
+      image: cassandra:3.11
+      depends_on:
+        - cassandra
+      volumes:
+        - ./src/main/resources/cassandra_schema.cql:/schema.cql
+      command: /bin/bash -c "sleep 60 && echo loading cassandra keyspace && cqlsh cassandra -f /schema.cql"

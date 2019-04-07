@@ -1,0 +1,16 @@
+target
+.history
+.classpath
+.project
+.settings
+.target
+.build
+.gradle/
+.idea/
+/.idea_modules
+/build/
+/.gradle/
+/.idea/
+/**/build
+build/
+/**/out

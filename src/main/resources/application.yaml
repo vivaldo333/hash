@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+app:
+  hash:
+      salt: AAA111
+      algorithm: SHA-1
+  mobile:
+      mask: 380000000000
+
+data:
+  cassandra:
+      uri: cassandra://localhost:9042
+  rows:
+      total-amount: 50000000
+      batch-amount: 60000
+      #restriction: Batch statement cannot contain more than 65535 statements.
