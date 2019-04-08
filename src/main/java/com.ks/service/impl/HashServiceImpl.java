@@ -16,6 +16,7 @@ import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.bouncycastle.jcajce.provider.digest.SHA512;
 import org.bouncycastle.util.encoders.Hex;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HashServiceImpl implements HashService {
@@ -39,7 +40,9 @@ public class HashServiceImpl implements HashService {
 
     public HashServiceImpl(MobileDao mobileDao) {
         this.mobileDao = mobileDao;
-        addAllHashesAndMobilesToMap();
+        //TODO fix NPE
+        //addAllHashesAndMobilesToMap();
+        this.hashToMobile = new HashMap<>();
     }
 
     @Override

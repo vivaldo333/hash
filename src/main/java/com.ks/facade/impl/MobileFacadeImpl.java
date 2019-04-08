@@ -39,7 +39,7 @@ public class MobileFacadeImpl implements MobileFacade {
     @Override
     public Route getMobileRoute() {
 
-        return path(segment("hash").slash(segment(compile("\\d+"))),
+        return path(segment("hash").slash(segment(compile(".*"))),
                 (hash) -> authenticateBasicAsync("secure",
                         basicAuthenticator,
                         userName -> complete(StatusCodes.OK, hashService.getMobile(hash).toString())));
@@ -47,7 +47,7 @@ public class MobileFacadeImpl implements MobileFacade {
 
     @Override
     public Route getHashRoute() {
-        return path(segment("mobile").slash(segment(compile(".*"))),
+        return path(segment("mobile").slash(segment(compile("\\d+"))),
                 (mobile) -> authenticateBasicAsync("secure",
                         basicAuthenticator,
                         userName -> complete(StatusCodes.OK, calculateHash(mobile))));
