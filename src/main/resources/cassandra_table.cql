@@ -1,4 +1,4 @@
 CREATE TABLE IF NOT EXISTS cellphone (
-  mobile VARCHAR,
+  mobile BIGINT,
   PRIMARY KEY (mobile)
 );

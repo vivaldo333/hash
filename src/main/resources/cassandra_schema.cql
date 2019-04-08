@@ -12,6 +12,6 @@ WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
 USE hashing;
 
 CREATE TABLE IF NOT EXISTS cellphone (
-  mobile VARCHAR,
+  mobile BIGINT,
   PRIMARY KEY (mobile)
 );
